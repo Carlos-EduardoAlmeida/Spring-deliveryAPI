@@ -3,6 +3,7 @@ package com.example.crud.controllers;
 import com.example.crud.domain.Address;
 import com.example.crud.domain.CepService;
 import com.example.crud.domain.User;
+import com.example.crud.domain.request.RequestEmail;
 import com.example.crud.domain.request.RequestPostAddress;
 import com.example.crud.domain.request.RequestUser;
 import com.example.crud.repository.AddressRepository;
@@ -22,8 +23,8 @@ public class AddressController {
     private AddressRepository addressRepository;
 
     @GetMapping
-    public ResponseEntity findAddressByEmail(@RequestBody User data){
-        String userid = userRepository.findByEmail(data.getEmail()).getId();
+    public ResponseEntity findAddressByEmail(@RequestBody RequestEmail data){
+        String userid = userRepository.findByEmail(data.email()).getId();
         Address address = addressRepository.findByUserid(userid);
         return ResponseEntity.ok(address);
     }

@@ -4,6 +4,8 @@ import com.example.crud.domain.request.RequestUser;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 
 @Table(name = "users")
 @Entity(name = "users")
@@ -18,10 +20,13 @@ public class User {
     private String id;
 
     private String name;
-
+    @Column(unique = true)
     private String email;
 
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 
     public User(RequestUser requestUser){
         this.name = requestUser.name();
