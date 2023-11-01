@@ -1,8 +1,9 @@
 package com.example.crud.controllers;
 
 import com.example.crud.domain.Order;
+import com.example.crud.domain.request.RequestEmailAndPassword;
 import com.example.crud.domain.request.RequestPutUser;
-import com.example.crud.domain.request.RequestUser;
+import com.example.crud.domain.request.RequestPostUser;
 import com.example.crud.domain.User;
 import com.example.crud.repository.AddressRepository;
 import com.example.crud.repository.OrderRepository;
@@ -26,20 +27,20 @@ public class UserController {
     @Autowired
     private OrderRepository orderRepository;
 
-    @GetMapping
-    public ResponseEntity getAllUsers(){
-        var allUsers = userRepository.findAll();
-        return ResponseEntity.ok(allUsers);
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody @Valid RequestEmailAndPassword data){
+        User user = userRepository.findByEmailAndPassword(data.email(), data.password());
+        return ResponseEntity.ok(user.getEmail());
     }
 
-    @PostMapping
-    public ResponseEntity registerUser(@RequestBody @Valid RequestUser data){
+    @PostMapping("/register")
+    public ResponseEntity registerUser(@RequestBody @Valid RequestPostUser data){
         User newUser = new User(data);
         userRepository.save(newUser);
         return ResponseEntity.ok(newUser.getName());
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public User updateUser(@RequestBody @Valid RequestPutUser data){
         User newUser = userRepository.findByEmailAndPassword(data.email(), data.password());
 
@@ -54,13 +55,13 @@ public class UserController {
         return newUser;
     }
 
-    @DeleteMapping
-    public ResponseEntity deleteUser(@RequestBody @Valid RequestUser data){
+    @DeleteMapping("/delete")
+    public ResponseEntity deleteUser(@RequestBody @Valid RequestEmailAndPassword data){
         User user = userRepository.findByEmailAndPassword(data.email(), data.password());
-        List<Order> listUser = orderRepository.findAllByUser(user);
-        for(Order eachUser : listUser){
-            if (eachUser.getUser().equals(user)) {
-                orderRepository.delete(eachUser);
+        List<Order> listOrder = orderRepository.findAllByUser(user);
+        for(Order eachOrder : listOrder){
+            if (eachOrder.getUser().equals(user)) {
+                orderRepository.delete(eachOrder);
             }
         }
         addressRepository.deleteById(user.getId());

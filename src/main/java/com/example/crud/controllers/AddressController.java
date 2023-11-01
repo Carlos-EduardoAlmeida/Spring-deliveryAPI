@@ -1,11 +1,9 @@
 package com.example.crud.controllers;
 
 import com.example.crud.domain.Address;
-import com.example.crud.domain.CepService;
 import com.example.crud.domain.User;
 import com.example.crud.domain.request.RequestEmail;
 import com.example.crud.domain.request.RequestPostAddress;
-import com.example.crud.domain.request.RequestUser;
 import com.example.crud.repository.AddressRepository;
 import com.example.crud.repository.UserRepository;
 import jakarta.validation.Valid;

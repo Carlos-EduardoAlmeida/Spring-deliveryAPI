@@ -1,6 +1,6 @@
 package com.example.crud.domain;
 
-import com.example.crud.domain.request.RequestUser;
+import com.example.crud.domain.request.RequestPostUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,7 +28,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
 
-    public User(RequestUser requestUser){
+    public User(RequestPostUser requestUser){
         this.name = requestUser.name();
         this.email = requestUser.email();
         this.password = requestUser.password();

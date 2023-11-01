@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -31,9 +33,10 @@ public class OrderController {
     }
 
     @PostMapping("/email")
-    public ResponseEntity allOrdersForEmail(@RequestBody @Valid RequestEmail data){
+    public List<Order> allOrdersForEmail(@RequestBody @Valid RequestEmail data){
         User user = userRepository.findByEmail(data.email());
-        var allOrders = orderRepository.findAllByUser(user);
-        return ResponseEntity.ok(allOrders);
+        List<Order> allOrders = orderRepository.findAllByUser(user);
+        System.out.println(allOrders);
+        return allOrders;
     }
 }
