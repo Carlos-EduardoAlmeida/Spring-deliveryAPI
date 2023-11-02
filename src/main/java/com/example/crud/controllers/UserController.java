@@ -30,17 +30,20 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid RequestEmailAndPassword data){
         User user = userRepository.findByEmailAndPassword(data.email(), data.password());
-        return ResponseEntity.ok(user.getEmail());
+        if(user != null)
+            return ResponseEntity.ok(user.getEmail());
+        else
+            return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity registerUser(@RequestBody @Valid RequestPostUser data){
         User newUser = new User(data);
         userRepository.save(newUser);
         return ResponseEntity.ok(newUser.getName());
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public User updateUser(@RequestBody @Valid RequestPutUser data){
         User newUser = userRepository.findByEmailAndPassword(data.email(), data.password());
 
@@ -55,17 +58,19 @@ public class UserController {
         return newUser;
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity deleteUser(@RequestBody @Valid RequestEmailAndPassword data){
+    @DeleteMapping
+    public ResponseEntity deleteUser(@RequestBody @Valid RequestEmailAndPassword data) {
         User user = userRepository.findByEmailAndPassword(data.email(), data.password());
-        List<Order> listOrder = orderRepository.findAllByUser(user);
-        for(Order eachOrder : listOrder){
-            if (eachOrder.getUser().equals(user)) {
-                orderRepository.delete(eachOrder);
+        if (user != null) {
+            List<Order> listOrder = orderRepository.findAllByUser(user);
+            for (Order eachOrder : listOrder) {
+                if (eachOrder.getUser().equals(user)) orderRepository.delete(eachOrder);
             }
+            addressRepository.deleteById(user.getId());
+            userRepository.deleteById(user.getId());
+            return ResponseEntity.ok(String.format("usuário %s deletado", user.getName()));
+        }else{
+            return ResponseEntity.notFound().build();
         }
-        addressRepository.deleteById(user.getId());
-        userRepository.deleteById(user.getId());
-        return ResponseEntity.ok(String.format("usuário %s deletado", user.getName()));
     }
 }

@@ -28,6 +28,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
 
+    @OneToOne(mappedBy = "user")
+    private Address address;
+
     public User(RequestPostUser requestUser){
         this.name = requestUser.name();
         this.email = requestUser.email();

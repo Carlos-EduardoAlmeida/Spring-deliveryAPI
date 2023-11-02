@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public interface AddressRepository extends JpaRepository<Address, String> {
-    Address findByUserid(String userid);
+    Address findByUser(User user);
 }

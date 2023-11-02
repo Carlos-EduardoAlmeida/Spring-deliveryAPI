@@ -9,6 +9,7 @@ import com.example.crud.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,43 +21,58 @@ public class AddressController {
     @Autowired
     private AddressRepository addressRepository;
 
-    @GetMapping
+    @PostMapping
+    public ResponseEntity registerAddress(@RequestBody @Valid RequestPostAddress data){
+        try {
+            System.out.println(data.email());
+            User userSource = userRepository.findByEmail(data.email());
+            Address newAddress = consultCep(data.cep());
+            newAddress.setNumero(data.numero());
+            newAddress.setComplemento(data.complemento());
+            newAddress.setUser(userSource);
+            if (!data.bairro().isBlank())
+                newAddress.setBairro(data.bairro());
+            if (!data.logradouro().isBlank())
+                newAddress.setLogradouro(data.logradouro());
+            if (!data.localidade().isBlank())
+                newAddress.setLocalidade(data.localidade());
+            addressRepository.save(newAddress);
+            return ResponseEntity.ok(newAddress);
+        }catch (RuntimeException exception){
+            return ResponseEntity.badRequest().build();
+        }
+
+    }
+
+    @DeleteMapping
+    public ResponseEntity deleteAdress(@RequestBody @Valid RequestEmail data){
+        try{
+            User userDelete = userRepository.findByEmail(data.email());
+            addressRepository.deleteById(userDelete.getAddress().getCep());
+            return ResponseEntity.ok().build();
+        }catch (RuntimeException exception){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/email")
     public ResponseEntity findAddressByEmail(@RequestBody RequestEmail data){
-        String userid = userRepository.findByEmail(data.email()).getId();
-        Address address = addressRepository.findByUserid(userid);
-        return ResponseEntity.ok(address);
+        User user = userRepository.findByEmail(data.email());
+        Address address = addressRepository.findByUser(user);
+        if(address != null)
+            return ResponseEntity.ok(address);
+        else return
+                ResponseEntity.notFound().build();
     }
 
     @PostMapping("/cep")
     public ResponseEntity consultAddressForCep(@RequestBody @Valid Address data){
-        Address address = consultCep(data.getCep());
-        return ResponseEntity.ok(address);
-    }
-
-
-    @PostMapping
-    public ResponseEntity registerAddress(@RequestBody @Valid RequestPostAddress data){
-        User userSource = userRepository.findByEmail(data.email());
-        Address newAddress = consultCep(data.cep());
-        if(userSource != null) {
-            newAddress.setNumero(data.numero());
-            newAddress.setComplemento(data.complemento());
-            newAddress.setUserid(userSource.getId());
-            if(data.bairro() != null)
-                newAddress.setBairro(data.bairro());
-            if(data.logradouro() != null)
-                newAddress.setLogradouro(data.logradouro());
-            if(data.localidade() != null)
-                newAddress.setLocalidade(data.localidade());
+        try{
+            Address address = consultCep(data.getCep());
+            return ResponseEntity.ok(address);
+        }catch (RuntimeException exception){
+            return ResponseEntity.badRequest().build();
         }
-        addressRepository.save(newAddress);
-        return ResponseEntity.ok(newAddress);
-    }
-
-    @DeleteMapping
-    public ResponseEntity deleteAdress(@RequestBody @Valid Address data){
-        addressRepository.deleteById(data.getUserid());
-        return ResponseEntity.ok().build();
     }
     private Address consultCep(String cep){
         RestTemplate restTemplate = new RestTemplate();

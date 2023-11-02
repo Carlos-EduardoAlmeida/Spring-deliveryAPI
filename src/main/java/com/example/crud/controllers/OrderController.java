@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -33,10 +34,8 @@ public class OrderController {
     }
 
     @PostMapping("/email")
-    public List<Order> allOrdersForEmail(@RequestBody @Valid RequestEmail data){
+    public ResponseEntity allOrdersForEmail(@RequestBody @Valid RequestEmail data){
         User user = userRepository.findByEmail(data.email());
-        List<Order> allOrders = orderRepository.findAllByUser(user);
-        System.out.println(allOrders);
-        return allOrders;
+        return ResponseEntity.ok(user.getOrders());
     }
 }

@@ -1,5 +1,6 @@
 package com.example.crud.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @Entity
 @Table(name = "orders")
 public class Order {
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "userid", nullable = false)
     private User user;

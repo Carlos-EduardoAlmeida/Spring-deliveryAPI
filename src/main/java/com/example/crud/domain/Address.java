@@ -1,8 +1,7 @@
 package com.example.crud.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +13,12 @@ import lombok.Setter;
 @Table(name = "address")
 @Entity(name = "address")
 public class Address {
-    @Id
-    private String userid;
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "userid", nullable = false)
+    private User user;
     private String numero;
+    @Id
     private String cep;
     private String logradouro;
     private String complemento;
