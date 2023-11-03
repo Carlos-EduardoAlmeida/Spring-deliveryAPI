@@ -3,6 +3,7 @@ package com.example.crud.controllers;
 import com.example.crud.domain.Order;
 import com.example.crud.domain.User;
 import com.example.crud.domain.request.RequestEmail;
+import com.example.crud.domain.request.RequestId;
 import com.example.crud.domain.request.RequestPostOrder;
 import com.example.crud.repository.OrderRepository;
 import com.example.crud.repository.UserRepository;
@@ -24,13 +25,27 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity registerOrder(@RequestBody @Valid RequestPostOrder data){
-        User userSource = userRepository.findByEmail(data.email());
-        Order newOrder = new Order();
-        newOrder.setOrders(data.orders());
-        newOrder.setUser(userSource);
-        newOrder.setQuantity(data.quantity());
-        orderRepository.save(newOrder);
-        return ResponseEntity.ok("pedido cadastrado: "+newOrder.getOrders());
+        try{
+            User userSource = userRepository.findByEmail(data.email());
+            Order newOrder = new Order();
+            newOrder.setOrders(data.orders());
+            newOrder.setUser(userSource);
+            newOrder.setQuantity(data.quantity());
+            orderRepository.save(newOrder);
+            return ResponseEntity.ok("pedido cadastrado: "+newOrder.getOrders());
+        }catch (RuntimeException exception){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity deleteOrder(@RequestBody @Valid RequestId data){
+        try{
+            orderRepository.deleteById(data.id());
+            return ResponseEntity.ok().build();
+        }catch (RuntimeException exception){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/email")

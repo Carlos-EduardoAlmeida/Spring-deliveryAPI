@@ -31,16 +31,20 @@ public class UserController {
     public ResponseEntity login(@RequestBody @Valid RequestEmailAndPassword data){
         User user = userRepository.findByEmailAndPassword(data.email(), data.password());
         if(user != null)
-            return ResponseEntity.ok(user.getEmail());
+            return ResponseEntity.ok(user);
         else
             return ResponseEntity.notFound().build();
     }
 
     @PostMapping
     public ResponseEntity registerUser(@RequestBody @Valid RequestPostUser data){
-        User newUser = new User(data);
-        userRepository.save(newUser);
-        return ResponseEntity.ok(newUser.getName());
+        try{
+            User newUser = new User(data);
+            userRepository.save(newUser);
+            return ResponseEntity.ok(newUser.getName());
+        }catch (RuntimeException exception){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping

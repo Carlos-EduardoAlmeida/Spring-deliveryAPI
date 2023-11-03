@@ -24,7 +24,6 @@ public class AddressController {
     @PostMapping
     public ResponseEntity registerAddress(@RequestBody @Valid RequestPostAddress data){
         try {
-            System.out.println(data.email());
             User userSource = userRepository.findByEmail(data.email());
             Address newAddress = consultCep(data.cep());
             newAddress.setNumero(data.numero());

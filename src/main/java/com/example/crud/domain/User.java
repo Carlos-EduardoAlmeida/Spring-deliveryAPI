@@ -1,6 +1,7 @@
 package com.example.crud.domain;
 
 import com.example.crud.domain.request.RequestPostUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 
 @Table(name = "users")
-@Entity(name = "users")
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class User {
     private String name;
     @Column(unique = true)
     private String email;
-
+    @JsonIgnore
     private String password;
 
     @OneToMany(mappedBy = "user")
