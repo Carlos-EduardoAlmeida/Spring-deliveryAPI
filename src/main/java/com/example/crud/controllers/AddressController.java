@@ -47,7 +47,7 @@ public class AddressController {
     public ResponseEntity deleteAdress(@RequestBody @Valid RequestEmail data){
         try{
             User userDelete = userRepository.findByEmail(data.email());
-            addressRepository.deleteById(userDelete.getAddress().getCep());
+            addressRepository.deleteById(userDelete.getAddress().getId());
             return ResponseEntity.ok().build();
         }catch (RuntimeException exception){
             return ResponseEntity.notFound().build();
