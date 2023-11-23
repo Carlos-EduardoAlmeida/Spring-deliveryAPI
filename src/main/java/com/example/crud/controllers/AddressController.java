@@ -3,6 +3,7 @@ package com.example.crud.controllers;
 import com.example.crud.domain.Address;
 import com.example.crud.domain.User;
 import com.example.crud.domain.request.RequestEmail;
+import com.example.crud.domain.request.RequestId;
 import com.example.crud.domain.request.RequestPostAddress;
 import com.example.crud.repository.AddressRepository;
 import com.example.crud.repository.UserRepository;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/address")
@@ -24,7 +27,7 @@ public class AddressController {
     @PostMapping
     public ResponseEntity registerAddress(@RequestBody @Valid RequestPostAddress data){
         try {
-            User userSource = userRepository.findByEmail(data.email());
+            User userSource = userRepository.findUserById(data.userId());
             Address newAddress = consultCep(data.cep());
             newAddress.setNumero(data.numero());
             newAddress.setComplemento(data.complemento());
@@ -43,10 +46,10 @@ public class AddressController {
 
     }
 
-    @DeleteMapping
-    public ResponseEntity deleteAdress(@RequestBody @Valid RequestEmail data){
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteAddress(@PathVariable("id") String id){
         try{
-            User userDelete = userRepository.findByEmail(data.email());
+            User userDelete = userRepository.findUserById(id);
             addressRepository.deleteById(userDelete.getAddress().getId());
             return ResponseEntity.ok().build();
         }catch (RuntimeException exception){
@@ -54,20 +57,21 @@ public class AddressController {
         }
     }
 
-    @PostMapping("/email")
-    public ResponseEntity findAddressByEmail(@RequestBody RequestEmail data){
-        User user = userRepository.findByEmail(data.email());
-        Address address = addressRepository.findByUser(user);
-        if(address != null)
+    @GetMapping("/{userId}")
+    public ResponseEntity findAddressByUserId(@PathVariable("userId") String userId){
+        Optional<User> userFind = userRepository.findById(userId);
+        if (userFind.isPresent()) {
+            Address address = userFind.get().getAddress();
             return ResponseEntity.ok(address);
-        else return
-                ResponseEntity.notFound().build();
+        }else{
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/cep")
-    public ResponseEntity consultAddressForCep(@RequestBody @Valid Address data){
+    @GetMapping("/cep/{cep}") //mudar para get para ser mais rapido
+    public ResponseEntity consultAddressForCep(@PathVariable("cep") String cep){
         try{
-            Address address = consultCep(data.getCep());
+            Address address = consultCep(cep);
             return ResponseEntity.ok(address);
         }catch (RuntimeException exception){
             return ResponseEntity.badRequest().build();

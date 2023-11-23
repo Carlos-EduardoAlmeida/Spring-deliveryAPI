@@ -26,31 +26,39 @@ public class OrderController {
     @PostMapping
     public ResponseEntity registerOrder(@RequestBody @Valid RequestPostOrder data){
         try{
-            User userSource = userRepository.findByEmail(data.email());
-            Order newOrder = new Order();
-            newOrder.setOrders(data.orders());
-            newOrder.setUser(userSource);
-            newOrder.setQuantity(data.quantity());
-            orderRepository.save(newOrder);
-            return ResponseEntity.ok("pedido cadastrado: "+newOrder.getOrders());
+            User userSource = userRepository.findUserById(data.id());
+            Order orderExists = orderRepository.findOrderByUserAndOrders(userSource, data.orders());
+            if(orderExists != null){
+                orderExists.setQuantity(orderExists.getQuantity()+data.quantity());
+                orderRepository.save(orderExists);
+            } else {
+                Order newOrder = new Order();
+                newOrder.setOrders(data.orders());
+                newOrder.setUser(userSource);
+                newOrder.setQuantity(data.quantity());
+                newOrder.setImage(data.image());
+                newOrder.setPrice(data.price());
+                orderRepository.save(newOrder);
+            }
+            return ResponseEntity.ok(orderRepository.findOrderByUserAndOrders(userSource, data.orders()));
         }catch (RuntimeException exception){
             return ResponseEntity.notFound().build();
         }
     }
 
-    @DeleteMapping
-    public ResponseEntity deleteOrder(@RequestBody @Valid RequestId data){
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteOrder(@PathVariable("id") String id){
         try{
-            orderRepository.deleteById(data.id());
+            orderRepository.deleteById(id);
             return ResponseEntity.ok().build();
         }catch (RuntimeException exception){
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @PostMapping("/email")
-    public ResponseEntity allOrdersForEmail(@RequestBody @Valid RequestEmail data){
-        User user = userRepository.findByEmail(data.email());
+    @GetMapping("/{id}")
+    public ResponseEntity allOrdersForEmail(@PathVariable("id") String id){
+        User user = userRepository.findUserById(id);
         return ResponseEntity.ok(user.getOrders());
     }
 }

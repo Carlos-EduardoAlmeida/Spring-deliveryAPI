@@ -25,4 +25,6 @@ public class Order {
     private String id;
     private String orders;
     private Integer quantity;
+    private String image;
+    private Integer price;
 }

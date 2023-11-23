@@ -2,7 +2,7 @@ package com.example.crud.controllers;
 
 import com.example.crud.domain.Order;
 import com.example.crud.domain.request.RequestEmailAndPassword;
-import com.example.crud.domain.request.RequestPutUser;
+import com.example.crud.domain.request.RequestPatchUser;
 import com.example.crud.domain.request.RequestPostUser;
 import com.example.crud.domain.User;
 import com.example.crud.repository.AddressRepository;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -26,6 +27,16 @@ public class UserController {
     private AddressRepository addressRepository;
     @Autowired
     private OrderRepository orderRepository;
+
+    @GetMapping("/{id}")
+    public ResponseEntity findAddressByUserId(@PathVariable("id") String id){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid RequestEmailAndPassword data){
@@ -41,38 +52,42 @@ public class UserController {
         try{
             User newUser = new User(data);
             userRepository.save(newUser);
-            return ResponseEntity.ok(newUser.getName());
+            return ResponseEntity.ok(newUser);
         }catch (RuntimeException exception){
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @PutMapping
-    public User updateUser(@RequestBody @Valid RequestPutUser data){
-        User newUser = userRepository.findByEmailAndPassword(data.email(), data.password());
+    @PatchMapping
+    public ResponseEntity updateUser(@RequestBody @Valid RequestPatchUser data){
+        try{
+            User newUser = userRepository.findUserById(data.id());
+            if(!data.name().isEmpty())
+                newUser.setName(data.name());
+            if(!data.email().isEmpty())
+                newUser.setEmail(data.email());
+            if(!data.password().isEmpty())
+                newUser.setEmail(data.password());
 
-        if(data.name() != null)
-            newUser.setName(data.name());
-        if(data.newEmail() != null)
-            newUser.setEmail(data.newEmail());
-        if(data.newPassword() != null)
-            newUser.setEmail(data.newPassword());
-
-        userRepository.save(newUser);
-        return newUser;
+            userRepository.save(newUser);
+            return ResponseEntity.ok(newUser);
+        }catch (RuntimeException exception){
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @DeleteMapping
-    public ResponseEntity deleteUser(@RequestBody @Valid RequestEmailAndPassword data) {
-        User user = userRepository.findByEmailAndPassword(data.email(), data.password());
-        if (user != null) {
-            List<Order> listOrder = orderRepository.findAllByUser(user);
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable("id") String id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            List<Order> listOrder = orderRepository.findAllByUser(user.get());
             for (Order eachOrder : listOrder) {
-                if (eachOrder.getUser().equals(user)) orderRepository.delete(eachOrder);
+                if (eachOrder.getUser().equals(user.get())) orderRepository.delete(eachOrder);
             }
-            addressRepository.deleteById(user.getId());
-            userRepository.deleteById(user.getId());
-            return ResponseEntity.ok(String.format("usuário %s deletado", user.getName()));
+            if(user.get().getAddress() != null)
+                addressRepository.deleteById(user.get().getAddress().getId());
+            userRepository.deleteById(id);
+            return ResponseEntity.ok().build();
         }else{
             return ResponseEntity.notFound().build();
         }
