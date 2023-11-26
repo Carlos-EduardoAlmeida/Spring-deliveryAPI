@@ -67,8 +67,7 @@ public class UserController {
             if(!data.email().isEmpty())
                 newUser.setEmail(data.email());
             if(!data.password().isEmpty())
-                newUser.setEmail(data.password());
-
+                newUser.setPassword(data.password());
             userRepository.save(newUser);
             return ResponseEntity.ok(newUser);
         }catch (RuntimeException exception){
