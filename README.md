@@ -6,7 +6,3 @@ API made in Java/Spring to be used in a delivery service, with registration, edi
 • Spring boot<br>
 • PostgreSQL<br>
 • Swagger, JPA, Flyway
-
-# Deploy
-Deploy made in "Render".<br> 
-URL: https://deliveryapi-ewcv.onrender.com
